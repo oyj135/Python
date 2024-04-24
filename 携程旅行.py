@@ -43,15 +43,14 @@ dp.get('https://hotels.ctrip.com/hotels/list?countryId=1&city=2&checkin=2024/05/
 # for循环下滑页面
 for page in range(1, 15):
     print(f'正在采集第{page}页的数据内容')
-    if page > 4:
-        # 元素定位 -> 通过css选择器定位元素
+    if page >= 4:
+        # 获取所有匹配的元素
         next_page = dp.ele('css:.btn-box span')
         # 判断是否出现点击按钮
         if next_page.text == '搜索更多酒店':
-            # 点击搜索更多酒店
-            next_page.click()
             dp.wait.load_start(2)
-            next_page = dp.ele('css:.btn-box span')
+            # 点击搜索更多酒店
+            next_page.click('js')
     # 等待数据包加载
     resp = dp.listen.wait()
     # 获取响应内容
@@ -71,12 +70,12 @@ for page in range(1, 15):
             '距离': index['position']['poi'],
             '纬度': index['position']['lat'],
             '经度': index['position']['lng'],
-            '评分': index['score']['number'],
-            '评价': index['score']['desc'],
-            '环境': index['score']['subScore'][0]['number'],
-            '卫生': index['score']['subScore'][1]['number'],
-            '服务': index['score']['subScore'][2]['number'],
-            '设施': index['score']['subScore'][3]['number'],
+            '评分': index['score'].get('number'),
+            '评价': index['score'].get('desc'),
+            '环境': index['score'].get('subScore')[0].get('number')if index['score'].get('subScore') else None,
+            '卫生': index['score'].get('subScore')[1].get('number')if index['score'].get('subScore') else None,
+            '服务': index['score'].get('subScore')[2].get('number')if index['score'].get('subScore') else None,
+            '设施': index['score'].get('subScore')[3].get('number')if index['score'].get('subScore') else None,
             '标签': ' '.join(index['base']['tags']),
         }
         # 写入数据
